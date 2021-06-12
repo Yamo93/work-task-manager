@@ -9,7 +9,7 @@ module.exports = {
         endOfLine: 'auto',
       },
     ],
-    'lines-between-class-members': [
+    '@typescript-eslint/lines-between-class-members': [
       'error',
       'always',
       {

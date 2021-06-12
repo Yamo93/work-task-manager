@@ -17,9 +17,7 @@ import AppUpdater from './auto-updater';
 
 export default class Main {
   static mainWindow: Electron.BrowserWindow | null = null;
-
   static application: Electron.App;
-
   static BrowserWindow: typeof BrowserWindow;
 
   private static onWindowAllClosed(): void {
