@@ -11,7 +11,7 @@
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import path from 'path';
-import { app, BrowserWindow, shell } from 'electron';
+import { app, BrowserWindow, ipcMain, shell } from 'electron';
 import MenuBuilder from './menu';
 import AppUpdater from './auto-updater';
 
@@ -107,6 +107,16 @@ export default class Main {
     Main.mainWindow.webContents.on('new-window', Main.onNewWindow);
   }
 
+  private static setupIcpListeners(): void {
+    /** Example of a ICP listener: 
+      * ipcMain.on('dashboard-mounted', (event, arg) => {
+      * console.log('Dashboard mounted');
+      * console.log(event);
+      * console.log(arg);
+    });
+    */
+  }
+
   private static async createWindow() {
     if (
       process.env.NODE_ENV === 'development' ||
@@ -124,6 +134,8 @@ export default class Main {
     Main.setupWindowListeners();
 
     Main.buildMenu(Main.mainWindow);
+
+    Main.setupIcpListeners();
 
     // Remove this if your app does not use auto updates
     // eslint-disable-next-line
