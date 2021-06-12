@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import './App.global.css';
-import Dashboard from './dashboard/Dashboard';
+import Dashboard from './Dashboard/Dashboard';
 
 export default function App() {
   return (
