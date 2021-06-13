@@ -11,7 +11,7 @@
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import path from 'path';
-import { app, BrowserWindow, shell } from 'electron';
+import { app, BrowserWindow, ipcMain, shell } from 'electron';
 import MenuBuilder from './menu';
 import AppUpdater from './auto-updater';
 
@@ -47,6 +47,13 @@ export default class Main {
       Main.mainWindow.show();
       Main.mainWindow.focus();
     }
+  }
+
+  private static onToggleDarkMode(): void {
+    if (!Main.mainWindow) {
+      throw new Error('"Main.mainWindow" is not defined');
+    }
+    Main.mainWindow.webContents.send('toggle-dark-mode');
   }
 
   private static async installExtensions() {
@@ -107,6 +114,16 @@ export default class Main {
     Main.mainWindow.webContents.on('new-window', Main.onNewWindow);
   }
 
+  private static setupIpcListeners(): void {
+    ipcMain.on('toggle-dark-mode', Main.onToggleDarkMode);
+  }
+
+  private static setupApplicationListeners(): void {
+    Main.application.on('window-all-closed', Main.onWindowAllClosed);
+    Main.application.on('ready', Main.onReady);
+    Main.application.on('activate', Main.onActivate);
+  }
+
   private static async createWindow() {
     if (
       process.env.NODE_ENV === 'development' ||
@@ -124,6 +141,8 @@ export default class Main {
     Main.setupWindowListeners();
 
     Main.buildMenu(Main.mainWindow);
+
+    Main.setupIpcListeners();
 
     // Remove this if your app does not use auto updates
     // eslint-disable-next-line
@@ -159,9 +178,8 @@ export default class Main {
     // makes the code easier to write tests for
     Main.BrowserWindow = browserWindow;
     Main.application = application;
-    Main.application.on('window-all-closed', Main.onWindowAllClosed);
-    Main.application.on('ready', Main.onReady);
-    Main.application.on('activate', Main.onActivate);
+
+    Main.setupApplicationListeners();
   }
 }
 
