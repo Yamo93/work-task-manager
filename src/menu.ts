@@ -202,6 +202,15 @@ export default class MenuBuilder {
             accelerator: 'Ctrl+O',
           },
           {
+            label: '&Toggle Dark Mode',
+            accelerator: 'Ctrl+T',
+            click: () => {
+              this.mainWindow.webContents.send('toggle-dark-mode', {
+                message: 'Toggle successful!',
+              });
+            },
+          },
+          {
             label: '&Close',
             accelerator: 'Ctrl+W',
             click: () => {

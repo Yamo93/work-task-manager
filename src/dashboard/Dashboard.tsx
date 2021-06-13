@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react';
+import React, { ReactElement, useEffect } from 'react';
 import {
   Container,
   Box,
@@ -9,13 +9,25 @@ import {
   Tab,
   TabPanels,
   TabPanel,
+  useColorMode,
 } from '@chakra-ui/react';
+import { ipcRenderer } from 'electron';
 import os from 'os';
-import s from './Dashboard.scss';
+
 import TabView from '../TabView/TabView';
+
+import s from './Dashboard.scss';
 
 export default function Dashboard(): ReactElement {
   const { username } = os.userInfo();
+  const { toggleColorMode } = useColorMode();
+
+  useEffect(() => {
+    ipcRenderer.on('toggle-dark-mode', (_event, _data) => {
+      toggleColorMode();
+    });
+  }, [toggleColorMode]);
+
   return (
     <div className={s.dashboard}>
       <Container maxW="container.xl">
