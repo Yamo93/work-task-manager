@@ -4,6 +4,7 @@ import {
   shell,
   BrowserWindow,
   MenuItemConstructorOptions,
+  ipcMain,
 } from 'electron';
 
 interface DarwinMenuItemConstructorOptions extends MenuItemConstructorOptions {
@@ -205,9 +206,7 @@ export default class MenuBuilder {
             label: '&Toggle Dark Mode',
             accelerator: 'Ctrl+T',
             click: () => {
-              this.mainWindow.webContents.send('toggle-dark-mode', {
-                message: 'Toggle successful!',
-              });
+              ipcMain.emit('toggle-dark-mode');
             },
           },
           {

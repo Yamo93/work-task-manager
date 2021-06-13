@@ -11,7 +11,7 @@
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import path from 'path';
-import { app, BrowserWindow, shell } from 'electron';
+import { app, BrowserWindow, ipcMain, shell } from 'electron';
 import MenuBuilder from './menu';
 import AppUpdater from './auto-updater';
 
@@ -47,6 +47,13 @@ export default class Main {
       Main.mainWindow.show();
       Main.mainWindow.focus();
     }
+  }
+
+  private static onToggleDarkMode(): void {
+    if (!Main.mainWindow) {
+      throw new Error('"Main.mainWindow" is not defined');
+    }
+    Main.mainWindow.webContents.send('toggle-dark-mode');
   }
 
   private static async installExtensions() {
@@ -108,13 +115,13 @@ export default class Main {
   }
 
   private static setupIpcListeners(): void {
-    /** Example of a IPC listener: 
-      * ipcMain.on('dashboard-mounted', (event, arg) => {
-      * console.log('Dashboard mounted');
-      * console.log(event);
-      * console.log(arg);
-    });
-    */
+    ipcMain.on('toggle-dark-mode', Main.onToggleDarkMode);
+  }
+
+  private static setupApplicationListeners(): void {
+    Main.application.on('window-all-closed', Main.onWindowAllClosed);
+    Main.application.on('ready', Main.onReady);
+    Main.application.on('activate', Main.onActivate);
   }
 
   private static async createWindow() {
@@ -171,9 +178,8 @@ export default class Main {
     // makes the code easier to write tests for
     Main.BrowserWindow = browserWindow;
     Main.application = application;
-    Main.application.on('window-all-closed', Main.onWindowAllClosed);
-    Main.application.on('ready', Main.onReady);
-    Main.application.on('activate', Main.onActivate);
+
+    Main.setupApplicationListeners();
   }
 }
 

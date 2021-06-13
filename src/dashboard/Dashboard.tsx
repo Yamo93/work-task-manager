@@ -23,7 +23,7 @@ export default function Dashboard(): ReactElement {
   const { toggleColorMode } = useColorMode();
 
   useEffect(() => {
-    ipcRenderer.on('toggle-dark-mode', (_event, _data) => {
+    ipcRenderer.once('toggle-dark-mode', () => {
       toggleColorMode();
     });
   }, [toggleColorMode]);
