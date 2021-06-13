@@ -105,6 +105,13 @@ export default class MenuBuilder {
       label: 'View',
       submenu: [
         {
+          label: 'Toggle Dark Mode',
+          accelerator: 'Command+T',
+          click: () => {
+            ipcMain.emit('toggle-dark-mode');
+          },
+        },
+        {
           label: 'Reload',
           accelerator: 'Command+R',
           click: () => {
