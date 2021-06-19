@@ -1,30 +1,25 @@
 import { ipcRenderer } from 'electron';
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { IWorkContext } from '../context/WorkContext';
+import LocalStorageService from '../services/LocalStorageService';
 
 type HookResult = IWorkContext;
 
-export default function useTimer(): HookResult {
-  const [workTime, setWorkTime] = useState(0);
+export default function useTimer(storedWorkTime: number): HookResult {
+  const [workTime, setWorkTime] = useState(storedWorkTime);
   const [completedWorkTime, setCompletedWorkTime] = useState(0);
   const [pausedWorkTime, setPausedWorkTime] = useState(0);
   const [intervalId, setIntervalId] = useState(0);
   const [pauseIntervalId, setPauseIntervalId] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
-  function startWorkTimer(): void {
-    const interval = window.setInterval(() => {
-      setWorkTime((previousWorkTime) => previousWorkTime + 1);
-    }, 1000);
-    setIntervalId(interval);
-  }
-
-  function stopWorkTimer(): void {
+  const stopWorkTimer = useCallback((): void => {
     window.clearInterval(intervalId);
-  }
+  }, [intervalId]);
 
   function clearWorkTime(): void {
     setWorkTime(0);
+    LocalStorageService.clearWorkTime();
   }
 
   function startPauseTimer(): void {
@@ -35,13 +30,23 @@ export default function useTimer(): HookResult {
     setIsPaused(true);
   }
 
-  function stopPauseTimer(): void {
+  const stopPauseTimer = useCallback((): void => {
     window.clearInterval(pauseIntervalId);
     setIsPaused(false);
+  }, [pauseIntervalId]);
+
+  function startWorkTimer(): void {
+    stopWorkTimer();
+    stopPauseTimer();
+    const interval = window.setInterval(() => {
+      setWorkTime((previousWorkTime) => previousWorkTime + 1);
+    }, 1000);
+    setIntervalId(interval);
   }
 
   function startWork(): void {
-    ipcRenderer.send('start-work');
+    const now = LocalStorageService.storeStartWorkTime();
+    ipcRenderer.send('start-work', now);
     startWorkTimer();
   }
 
@@ -70,6 +75,17 @@ export default function useTimer(): HookResult {
 
     return `${hours}:${minutes}:${seconds}`;
   }
+
+  useEffect(() => {
+    if (storedWorkTime) {
+      startWorkTimer();
+    }
+
+    return (): void => {
+      window.clearInterval(intervalId);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storedWorkTime]);
 
   return {
     startWork,

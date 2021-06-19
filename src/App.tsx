@@ -4,6 +4,7 @@ import './App.global.css';
 import Dashboard from './Dashboard/Dashboard';
 import WorkContext from './context/WorkContext';
 import useTimer from './hooks/useTimer';
+import LocalStorageService from './services/LocalStorageService';
 
 export default function App() {
   const {
@@ -16,7 +17,7 @@ export default function App() {
     completedWorkTime,
     pausedWorkTime,
     isPaused,
-  } = useTimer();
+  } = useTimer(LocalStorageService.getStartWorkTime());
 
   return (
     <WorkContext.Provider

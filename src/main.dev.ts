@@ -66,8 +66,8 @@ export default class Main {
     Main.mainWindow.webContents.send('toggle-dark-mode');
   }
 
-  private static onStartWork(): void {
-    Main.startTimeForWork = new Date(Date.now());
+  private static onStartWork(_event: Event, now: Date): void {
+    Main.startTimeForWork = now;
   }
 
   private static onStopWork(): void {
