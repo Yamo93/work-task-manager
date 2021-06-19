@@ -19,6 +19,8 @@ export default class Main {
   static mainWindow: Electron.BrowserWindow | null = null;
   static application: Electron.App;
   static BrowserWindow: typeof BrowserWindow;
+  static startTimeForWork: Date;
+  static stopTimeForWork: Date;
 
   private static onWindowAllClosed(): void {
     // Respect the OSX convention of having the application in memory even
@@ -54,6 +56,14 @@ export default class Main {
       throw new Error('"Main.mainWindow" is not defined');
     }
     Main.mainWindow.webContents.send('toggle-dark-mode');
+  }
+
+  private static onStartWork(): void {
+    Main.startTimeForWork = new Date(Date.now());
+  }
+
+  private static onStopWork(): void {
+    Main.stopTimeForWork = new Date(Date.now());
   }
 
   private static async installExtensions() {
@@ -116,6 +126,8 @@ export default class Main {
 
   private static setupIpcListeners(): void {
     ipcMain.on('toggle-dark-mode', Main.onToggleDarkMode);
+    ipcMain.on('start-work', Main.onStartWork);
+    ipcMain.on('stop-work', Main.onStopWork);
   }
 
   private static setupApplicationListeners(): void {
