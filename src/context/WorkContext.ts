@@ -1,6 +1,6 @@
 import { createContext } from 'react';
 
-interface IWorkContext {
+export interface IWorkContext {
   workTime: number;
   completedWorkTime: number;
   pausedWorkTime: number;
