@@ -1,5 +1,16 @@
-import { Button, Container, Text } from '@chakra-ui/react';
 import React, { ReactElement, useContext } from 'react';
+import {
+  Button,
+  ButtonGroup,
+  Container,
+  Stat,
+  StatLabel,
+  StatNumber,
+  StatHelpText,
+  StatArrow,
+  StatGroup,
+} from '@chakra-ui/react';
+
 import WorkContext from '../context/WorkContext';
 
 export default function WorkCheckIn(): ReactElement {
@@ -16,12 +27,8 @@ export default function WorkCheckIn(): ReactElement {
   } = useContext(WorkContext);
 
   const formattedWorkTime = formatTime?.(workTime);
-  const formattedCompletedWorkTime = completedWorkTime
-    ? formatTime?.(completedWorkTime)
-    : '';
-  const formattedPausedWorkTime = pausedWorkTime
-    ? formatTime?.(pausedWorkTime)
-    : '';
+  const formattedCompletedWorkTime = formatTime?.(completedWorkTime);
+  const formattedPausedWorkTime = formatTime?.(pausedWorkTime);
   const startStopButtonAction = workTime ? stopWork : startWork;
   const startStopButtonText = workTime ? 'Stop work' : 'Start work';
   const pauseResumeButtonAction = isPaused ? resumeWork : pauseWork;
@@ -29,11 +36,38 @@ export default function WorkCheckIn(): ReactElement {
 
   return (
     <Container>
-      <Text>Time worked: {formattedWorkTime}</Text>
-      <Text>Paused work time: {formattedPausedWorkTime}</Text>
-      <Text>Completed work time: {formattedCompletedWorkTime}</Text>
-      <Button onClick={startStopButtonAction}>{startStopButtonText}</Button>
-      <Button onClick={pauseResumeButtonAction}>{pauseResumeButtonText}</Button>
+      <StatGroup>
+        <Stat>
+          <StatLabel>Time worked</StatLabel>
+          <StatNumber>{formattedWorkTime}</StatNumber>
+          <StatHelpText>
+            <StatArrow type="increase" />
+            Good job!
+          </StatHelpText>
+        </Stat>
+
+        <Stat>
+          <StatLabel>Paused work time</StatLabel>
+          <StatNumber>{formattedPausedWorkTime}</StatNumber>
+          <StatHelpText>
+            <StatArrow type="decrease" />
+            Get back to work.
+          </StatHelpText>
+        </Stat>
+      </StatGroup>
+
+      <Stat marginTop={5}>
+        <StatLabel>Completed work time</StatLabel>
+        <StatNumber>{formattedCompletedWorkTime}</StatNumber>
+      </Stat>
+      <ButtonGroup marginTop={30} variant="outline" spacing="6">
+        <Button colorScheme="blue" onClick={startStopButtonAction}>
+          {startStopButtonText}
+        </Button>
+        <Button onClick={pauseResumeButtonAction}>
+          {pauseResumeButtonText}
+        </Button>
+      </ButtonGroup>
     </Container>
   );
 }
