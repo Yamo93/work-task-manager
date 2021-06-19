@@ -17,6 +17,7 @@ import os from 'os';
 import TabView from '../TabView/TabView';
 
 import s from './Dashboard.scss';
+import WorkCheckIn from '../WorkCheckIn/WorkCheckIn';
 
 export default function Dashboard(): ReactElement {
   const { username } = os.userInfo();
@@ -56,7 +57,7 @@ export default function Dashboard(): ReactElement {
             </TabPanel>
             <TabPanel>
               <TabView>
-                <Container>Work check-in</Container>
+                <WorkCheckIn />
               </TabView>
             </TabPanel>
             <TabPanel>
