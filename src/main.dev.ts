@@ -11,7 +11,15 @@
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import path from 'path';
-import { app, BrowserWindow, ipcMain, shell } from 'electron';
+import {
+  app,
+  BrowserWindow,
+  ipcMain,
+  Menu,
+  nativeImage,
+  shell,
+  Tray,
+} from 'electron';
 import MenuBuilder from './menu';
 import AppUpdater from './auto-updater';
 
@@ -21,13 +29,13 @@ export default class Main {
   static BrowserWindow: typeof BrowserWindow;
   static startTimeForWork: Date;
   static stopTimeForWork: Date;
+  static tray: Tray;
 
   private static onWindowAllClosed(): void {
-    // Respect the OSX convention of having the application in memory even
-    // after all windows have been closed
-    if (process.platform !== 'darwin') {
-      app.quit();
+    if (process.platform === 'darwin') {
+      app.dock.hide();
     }
+    // use same logic for other OSes you want
   }
 
   private static onMainWindowClosed(): void {
@@ -161,8 +169,32 @@ export default class Main {
     new AppUpdater();
   }
 
+  private static createTray() {
+    const RESOURCES_PATH = Main.getResourcesPath();
+    const icon = Main.getAssetPath(RESOURCES_PATH, 'icon.png');
+    const trayIcon = nativeImage.createFromPath(icon);
+    Main.tray = new Tray(trayIcon.resize({ width: 16 }));
+    const contextMenu = Menu.buildFromTemplate([
+      {
+        label: 'Show App',
+        click: () => {
+          Main.createWindow();
+        },
+      },
+      {
+        label: 'Quit',
+        click: () => {
+          app.quit();
+        },
+      },
+    ]);
+
+    Main.tray.setContextMenu(contextMenu);
+  }
+
   private static async onReady() {
     await Main.createWindow();
+    Main.createTray();
   }
 
   private static onActivate() {
