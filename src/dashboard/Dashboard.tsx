@@ -16,7 +16,7 @@ import os from 'os';
 
 import TabView from '../TabView/TabView';
 
-import * as s from './Dashboard.scss';
+import s from './Dashboard.scss';
 import WorkCheckIn from '../WorkCheckIn/WorkCheckIn';
 
 export default function Dashboard(): ReactElement {

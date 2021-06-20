@@ -145,6 +145,9 @@ export default merge(baseConfig, {
           },
           {
             loader: 'sass-loader',
+            options: {
+              sourceMap: true,
+            },
           },
         ],
       },

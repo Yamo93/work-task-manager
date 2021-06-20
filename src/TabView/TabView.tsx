@@ -1,5 +1,5 @@
 import React, { ReactElement, ReactNode } from 'react';
-import * as s from './TabView.scss';
+import s from './TabView.scss';
 
 interface Props {
   children: ReactNode;
