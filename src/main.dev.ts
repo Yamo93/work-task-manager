@@ -22,6 +22,8 @@ import {
 } from 'electron';
 import MenuBuilder from './menu';
 import AppUpdater from './auto-updater';
+import FileService from './services/FileService';
+import { IWorkLog } from './models/models';
 
 export default class Main {
   static mainWindow: Electron.BrowserWindow | null = null;
@@ -70,8 +72,9 @@ export default class Main {
     Main.startTimeForWork = now;
   }
 
-  private static onStopWork(): void {
+  private static onStopWork(_event: Event, workLog: IWorkLog): void {
     Main.stopTimeForWork = new Date(Date.now());
+    FileService.saveWorkLog(workLog);
   }
 
   private static async installExtensions() {
