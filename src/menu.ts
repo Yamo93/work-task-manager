@@ -217,10 +217,17 @@ export default class MenuBuilder {
             },
           },
           {
-            label: '&Close',
+            label: '&Close window',
             accelerator: 'Ctrl+W',
             click: () => {
               this.mainWindow.close();
+            },
+          },
+          {
+            label: '&Quit app',
+            accelerator: 'Ctrl+Q',
+            click: () => {
+              app.quit();
             },
           },
         ],
