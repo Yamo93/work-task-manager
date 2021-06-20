@@ -1,5 +1,5 @@
 import { ipcRenderer } from 'electron';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { IWorkContext } from '../context/WorkContext';
 import LocalStorageService from '../services/LocalStorageService';
 
@@ -13,9 +13,9 @@ export default function useTimer(storedWorkTime: number): HookResult {
   const [pauseIntervalId, setPauseIntervalId] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
-  const stopWorkTimer = useCallback((): void => {
+  function stopWorkTimer(): void {
     window.clearInterval(intervalId);
-  }, [intervalId]);
+  }
 
   function clearWorkTime(): void {
     setWorkTime(0);
@@ -30,14 +30,13 @@ export default function useTimer(storedWorkTime: number): HookResult {
     setIsPaused(true);
   }
 
-  const stopPauseTimer = useCallback((): void => {
+  function stopPauseTimer(): void {
     window.clearInterval(pauseIntervalId);
     setIsPaused(false);
-  }, [pauseIntervalId]);
+  }
 
   function startWorkTimer(): void {
     stopWorkTimer();
-    stopPauseTimer();
     const interval = window.setInterval(() => {
       setWorkTime((previousWorkTime) => previousWorkTime + 1);
     }, 1000);
@@ -77,7 +76,7 @@ export default function useTimer(storedWorkTime: number): HookResult {
   }
 
   useEffect(() => {
-    if (storedWorkTime) {
+    if (!isPaused && storedWorkTime) {
       startWorkTimer();
     }
 
