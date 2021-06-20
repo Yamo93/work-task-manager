@@ -7,7 +7,15 @@ import useTimer from './hooks/useTimer';
 import LocalStorageService from './services/LocalStorageService';
 
 export default function App() {
-  const timeProperties = useTimer(LocalStorageService.getStartWorkTime());
+  const storedIsPausing = LocalStorageService.getIsPausing();
+  const storedSecondsPaused = storedIsPausing
+    ? LocalStorageService.getSecondsPausedUntilNow()
+    : LocalStorageService.getSecondsPaused();
+  const timeProperties = useTimer({
+    storedWorkTime: LocalStorageService.getStartWorkTime(),
+    storedIsPausing,
+    storedSecondsPaused,
+  });
 
   return (
     <WorkContext.Provider value={{ ...timeProperties }}>

@@ -3,6 +3,7 @@ import { createContext } from 'react';
 export interface IWorkContext {
   workTime: number;
   completedWorkTime: number;
+  completedPauseTime: number;
   pausedWorkTime: number;
   startWork?: () => void;
   stopWork?: () => void;
@@ -15,6 +16,7 @@ export interface IWorkContext {
 const workContext = createContext<IWorkContext>({
   workTime: 0,
   completedWorkTime: 0,
+  completedPauseTime: 0,
   pausedWorkTime: 0,
   isPausing: false,
 });

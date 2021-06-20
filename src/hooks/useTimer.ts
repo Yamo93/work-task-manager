@@ -5,10 +5,21 @@ import LocalStorageService from '../services/LocalStorageService';
 
 type HookResult = IWorkContext;
 
-export default function useTimer(storedWorkTime: number): HookResult {
+interface HookConfig {
+  storedWorkTime: number;
+  storedIsPausing: boolean;
+  storedSecondsPaused: number;
+}
+
+export default function useTimer({
+  storedWorkTime,
+  storedIsPausing,
+  storedSecondsPaused,
+}: HookConfig): HookResult {
   const [workTime, setWorkTime] = useState(storedWorkTime);
   const [completedWorkTime, setCompletedWorkTime] = useState(0);
-  const [pausedWorkTime, setPausedWorkTime] = useState(0);
+  const [completedPauseTime, setCompletedPauseTime] = useState(0);
+  const [pausedWorkTime, setPausedWorkTime] = useState(storedSecondsPaused);
   const [intervalId, setIntervalId] = useState(0);
   const [pauseIntervalId, setPauseIntervalId] = useState(0);
   const [isPausing, setIsPausing] = useState(false);
@@ -20,6 +31,14 @@ export default function useTimer(storedWorkTime: number): HookResult {
   function clearWorkTime(): void {
     setWorkTime(0);
     LocalStorageService.clearWorkTime();
+    LocalStorageService.clearWorkedSeconds();
+  }
+
+  function clearPauseTime(): void {
+    setPausedWorkTime(0);
+    LocalStorageService.clearLatestPausedAt();
+    LocalStorageService.clearIsPausing();
+    LocalStorageService.clearSecondsPaused();
   }
 
   function startPauseTimer(): void {
@@ -52,19 +71,23 @@ export default function useTimer(storedWorkTime: number): HookResult {
   function stopWork(): void {
     ipcRenderer.send('stop-work');
     setCompletedWorkTime(workTime);
+    setCompletedPauseTime(pausedWorkTime);
     stopWorkTimer();
     clearWorkTime();
     stopPauseTimer();
+    clearPauseTime();
   }
 
   function pauseWork(): void {
     stopWorkTimer();
     startPauseTimer();
+    LocalStorageService.storeLatestPausedAt();
   }
 
   function resumeWork(): void {
     stopPauseTimer();
     startWorkTimer();
+    LocalStorageService.storeSecondsPaused(pausedWorkTime);
   }
 
   function formatTime(time: number = workTime): string {
@@ -76,15 +99,28 @@ export default function useTimer(storedWorkTime: number): HookResult {
   }
 
   useEffect(() => {
-    if (!isPausing && storedWorkTime) {
+    if (!isPausing && !storedIsPausing && storedWorkTime) {
       startWorkTimer();
+    }
+
+    if (isPausing || storedIsPausing) {
+      startPauseTimer();
     }
 
     return (): void => {
       window.clearInterval(intervalId);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [storedWorkTime]);
+  }, []);
+
+  useEffect(() => {
+    LocalStorageService.storeIsPausing(isPausing);
+
+    if (isPausing) {
+      LocalStorageService.storeWorkedSeconds(workTime);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPausing]);
 
   return {
     startWork,
@@ -96,5 +132,6 @@ export default function useTimer(storedWorkTime: number): HookResult {
     completedWorkTime,
     pausedWorkTime,
     isPausing,
+    completedPauseTime,
   };
 }

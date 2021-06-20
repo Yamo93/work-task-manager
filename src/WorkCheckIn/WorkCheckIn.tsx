@@ -20,12 +20,14 @@ export default function WorkCheckIn(): ReactElement {
     formatTime,
     workTime,
     completedWorkTime,
+    completedPauseTime,
     pausedWorkTime,
     isPausing,
   } = useContext(WorkContext);
 
   const formattedWorkTime = formatTime?.(workTime);
   const formattedCompletedWorkTime = formatTime?.(completedWorkTime);
+  const formattedCompletedPauseTime = formatTime?.(completedPauseTime);
   const formattedPausedWorkTime = formatTime?.(pausedWorkTime);
   const startStopButtonAction = workTime ? stopWork : startWork;
   const startStopButtonText = workTime ? 'Stop work' : 'Start work';
@@ -33,7 +35,7 @@ export default function WorkCheckIn(): ReactElement {
   const pauseResumeButtonText = isPausing ? 'Resume work' : 'Pause work';
 
   return (
-    <Container>
+    <Container maxW="container.xl">
       <StatGroup>
         <Stat>
           <StatLabel>Time worked</StatLabel>
@@ -46,12 +48,21 @@ export default function WorkCheckIn(): ReactElement {
         </Stat>
       </StatGroup>
 
-      <Stat marginTop={5}>
-        <StatLabel>Completed work time</StatLabel>
-        <StatNumber>{formattedCompletedWorkTime}</StatNumber>
-      </Stat>
+      <StatGroup marginTop={5}>
+        <Stat>
+          <StatLabel>Completed work time</StatLabel>
+          <StatNumber>{formattedCompletedWorkTime}</StatNumber>
+        </Stat>
+        <Stat>
+          <StatLabel>Completed pause time</StatLabel>
+          <StatNumber>{formattedCompletedPauseTime}</StatNumber>
+        </Stat>
+      </StatGroup>
       <ButtonGroup marginTop={30} variant="outline" spacing="6">
-        <Button colorScheme="blue" onClick={startStopButtonAction}>
+        <Button
+          colorScheme={workTime ? 'red' : 'blue'}
+          onClick={startStopButtonAction}
+        >
           {startStopButtonText}
         </Button>
         <Button disabled={!workTime} onClick={pauseResumeButtonAction}>
