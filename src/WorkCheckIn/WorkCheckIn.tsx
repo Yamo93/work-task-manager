@@ -21,7 +21,7 @@ export default function WorkCheckIn(): ReactElement {
     workTime,
     completedWorkTime,
     pausedWorkTime,
-    isPaused,
+    isPausing,
   } = useContext(WorkContext);
 
   const formattedWorkTime = formatTime?.(workTime);
@@ -29,8 +29,8 @@ export default function WorkCheckIn(): ReactElement {
   const formattedPausedWorkTime = formatTime?.(pausedWorkTime);
   const startStopButtonAction = workTime ? stopWork : startWork;
   const startStopButtonText = workTime ? 'Stop work' : 'Start work';
-  const pauseResumeButtonAction = isPaused ? resumeWork : pauseWork;
-  const pauseResumeButtonText = isPaused ? 'Resume work' : 'Pause work';
+  const pauseResumeButtonAction = isPausing ? resumeWork : pauseWork;
+  const pauseResumeButtonText = isPausing ? 'Resume work' : 'Pause work';
 
   return (
     <Container>

@@ -11,7 +11,7 @@ export default function useTimer(storedWorkTime: number): HookResult {
   const [pausedWorkTime, setPausedWorkTime] = useState(0);
   const [intervalId, setIntervalId] = useState(0);
   const [pauseIntervalId, setPauseIntervalId] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
+  const [isPausing, setIsPausing] = useState(false);
 
   function stopWorkTimer(): void {
     window.clearInterval(intervalId);
@@ -27,12 +27,12 @@ export default function useTimer(storedWorkTime: number): HookResult {
       setPausedWorkTime((previousPausedWorkTime) => previousPausedWorkTime + 1);
     }, 1000);
     setPauseIntervalId(pauseInterval);
-    setIsPaused(true);
+    setIsPausing(true);
   }
 
   function stopPauseTimer(): void {
     window.clearInterval(pauseIntervalId);
-    setIsPaused(false);
+    setIsPausing(false);
   }
 
   function startWorkTimer(): void {
@@ -76,7 +76,7 @@ export default function useTimer(storedWorkTime: number): HookResult {
   }
 
   useEffect(() => {
-    if (!isPaused && storedWorkTime) {
+    if (!isPausing && storedWorkTime) {
       startWorkTimer();
     }
 
@@ -95,6 +95,6 @@ export default function useTimer(storedWorkTime: number): HookResult {
     formatTime,
     completedWorkTime,
     pausedWorkTime,
-    isPaused,
+    isPausing,
   };
 }

@@ -9,14 +9,14 @@ export interface IWorkContext {
   pauseWork?: () => void;
   resumeWork?: () => void;
   formatTime?: (time?: number) => string;
-  isPaused: boolean;
+  isPausing: boolean;
 }
 
 const workContext = createContext<IWorkContext>({
   workTime: 0,
   completedWorkTime: 0,
   pausedWorkTime: 0,
-  isPaused: false,
+  isPausing: false,
 });
 
 export default workContext;
