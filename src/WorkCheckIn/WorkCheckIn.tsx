@@ -6,8 +6,6 @@ import {
   Stat,
   StatLabel,
   StatNumber,
-  StatHelpText,
-  StatArrow,
   StatGroup,
 } from '@chakra-ui/react';
 
@@ -40,19 +38,11 @@ export default function WorkCheckIn(): ReactElement {
         <Stat>
           <StatLabel>Time worked</StatLabel>
           <StatNumber>{formattedWorkTime}</StatNumber>
-          <StatHelpText>
-            <StatArrow type="increase" />
-            Good job!
-          </StatHelpText>
         </Stat>
 
         <Stat>
           <StatLabel>Paused work time</StatLabel>
           <StatNumber>{formattedPausedWorkTime}</StatNumber>
-          <StatHelpText>
-            <StatArrow type="decrease" />
-            Get back to work.
-          </StatHelpText>
         </Stat>
       </StatGroup>
 
@@ -64,7 +54,7 @@ export default function WorkCheckIn(): ReactElement {
         <Button colorScheme="blue" onClick={startStopButtonAction}>
           {startStopButtonText}
         </Button>
-        <Button onClick={pauseResumeButtonAction}>
+        <Button disabled={!workTime} onClick={pauseResumeButtonAction}>
           {pauseResumeButtonText}
         </Button>
       </ButtonGroup>
