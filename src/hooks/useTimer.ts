@@ -1,6 +1,6 @@
-import { ipcRenderer } from 'electron';
 import { useEffect, useState } from 'react';
 import { IWorkContext } from '../context/WorkContext';
+import IpcService from '../services/IpcService';
 import LocalStorageService from '../services/LocalStorageService';
 
 type HookResult = IWorkContext;
@@ -64,12 +64,12 @@ export default function useTimer({
 
   function startWork(): void {
     const now = LocalStorageService.storeStartWorkTime();
-    ipcRenderer.send('start-work', now);
+    IpcService.emitStartWork(now);
     startWorkTimer();
   }
 
   function stopWork(): void {
-    ipcRenderer.send('stop-work');
+    IpcService.emitStopWork();
     setCompletedWorkTime(workTime);
     setCompletedPauseTime(pausedWorkTime);
     stopWorkTimer();
