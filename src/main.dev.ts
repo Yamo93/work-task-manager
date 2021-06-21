@@ -139,6 +139,16 @@ export default class Main {
     ipcMain.on('toggle-dark-mode', Main.onToggleDarkMode);
     ipcMain.on('start-work', Main.onStartWork);
     ipcMain.on('stop-work', Main.onStopWork);
+    ipcMain.on('read-worklogs', Main.onReadWorkLogs);
+  }
+
+  static async onReadWorkLogs() {
+    try {
+      const workLogs = await FileService.readWorkLogs();
+      Main.mainWindow?.webContents.send('read-worklogs', workLogs);
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 
   private static setupApplicationListeners(): void {

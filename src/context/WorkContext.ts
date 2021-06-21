@@ -1,4 +1,5 @@
-import { createContext } from 'react';
+import { createContext, SetStateAction } from 'react';
+import { IWorkLog } from '../models/models';
 
 export interface IWorkContext {
   workTime: number;
