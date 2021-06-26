@@ -25,7 +25,7 @@
     "yarn.lock": true,
     "*.{css,sass,scss}.d.ts": true
   },
-  "editor.formatOnSave": true,
+  "editor.formatOnSave": false,
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": true
   },
