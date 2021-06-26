@@ -72,9 +72,13 @@ export default class Main {
     Main.startTimeForWork = now;
   }
 
-  private static onStopWork(_event: Event, workLog: IWorkLog): void {
+  private static async onStopWork(
+    _event: Event,
+    workLog: IWorkLog
+  ): Promise<void> {
     Main.stopTimeForWork = new Date(Date.now());
-    FileService.saveWorkLog(workLog);
+    await FileService.saveWorkLog(workLog);
+    await Main.onReadWorkLogs();
   }
 
   private static async installExtensions() {

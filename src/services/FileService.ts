@@ -1,4 +1,4 @@
-import { promises as fs, mkdir, mkdirSync } from 'fs';
+import { promises as fs, mkdirSync } from 'fs';
 import moment from 'moment';
 import path from 'path';
 import { IWorkLog } from '../models/models';
@@ -15,22 +15,54 @@ export default class FileService {
     FileService.currentWeek.toString(),
   ];
 
+  static newFilePath: string = path.join(
+    ...FileService.pathChunks,
+    `${FileService.currentDate}.json`
+  );
+
   static newDirectory: string = path.join(...FileService.pathChunks);
 
   static async listDirectories(): Promise<string[]> {
-    return fs.readdir(FileService.newDirectory);
+    try {
+      const directories = await fs.readdir(FileService.newDirectory);
+      return directories;
+    } catch (error) {
+      throw new Error('Cannot list directories');
+    }
   }
 
   static ensureDirectoryExists() {
-    return mkdirSync(FileService.newDirectory, { recursive: true });
+    try {
+      return mkdirSync(FileService.newDirectory, { recursive: true });
+    } catch (error) {
+      throw new Error('Directory cannot be created.');
+    }
+  }
+
+  static async saveWorkLogFile(workLog: IWorkLog): Promise<void> {
+    const stringifiedWorkLog = FileService.getPrettifiedJson(workLog);
+    await FileService.writeFile(stringifiedWorkLog);
+  }
+
+  static async writeFile(fileContent: string) {
+    try {
+      await fs.writeFile(FileService.newFilePath, fileContent);
+    } catch (error) {
+      throw new Error('Cannot write file');
+    }
+  }
+
+  static getPrettifiedJson(workLog: IWorkLog): string {
+    try {
+      return JSON.stringify(workLog, null, 2);
+    } catch (error) {
+      throw new Error('Cannot stringify');
+    }
   }
 
   static async readWorkLogs(): Promise<IWorkLog[]> {
-    try {
-      FileService.ensureDirectoryExists();
-    } catch (error) {
-      throw new Error('Directory cant be created.');
-    }
+    FileService.ensureDirectoryExists();
+
     const fileNames = await fs.readdir(FileService.newDirectory);
     const filePaths = fileNames.map((fileName) =>
       path.join(...FileService.pathChunks, fileName)
@@ -38,7 +70,7 @@ export default class FileService {
 
     return new Promise((resolve, reject) => {
       const workLogs: Array<IWorkLog> = [];
-      const promises = filePaths.map((filePath) => {
+      const promises = filePaths.map((filePath: string) => {
         return fs
           .readFile(filePath, 'utf8')
           .then((workLog) => {
@@ -61,16 +93,8 @@ export default class FileService {
     });
   }
 
-  static saveWorkLog(workLog: IWorkLog): void {
-    const newFilePath = path.join(
-      ...FileService.pathChunks,
-      `${FileService.currentDate}.json`
-    );
-    const stringifiedWorkLog = JSON.stringify(workLog, null, 2);
-    mkdir(FileService.newDirectory, { recursive: true }, (err) => {
-      if (err) throw err;
-
-      fs.writeFile(newFilePath, stringifiedWorkLog);
-    });
+  static async saveWorkLog(workLog: IWorkLog): Promise<void> {
+    FileService.ensureDirectoryExists();
+    FileService.saveWorkLogFile(workLog);
   }
 }

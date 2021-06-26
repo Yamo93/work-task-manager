@@ -3,16 +3,14 @@ import WorkLogFactory from '../factories/WorkLogFactory';
 import { IWorkLog } from '../models/models';
 import ipcServiceKeys from './const/IpcServiceKeys';
 
+type ListenToReadWorkLogsCallback = (
+  event: IpcRendererEvent,
+  logs: Array<IWorkLog>
+) => void;
+
 export default class IpcService {
-  static async listenToReadWorkLogs(): Promise<Array<IWorkLog>> {
-    let logs: Array<IWorkLog> = [];
-    await ipcRenderer.once(
-      ipcServiceKeys.readWorkLogs,
-      (_event: IpcRendererEvent, workLogs: Array<IWorkLog>) => {
-        logs = workLogs;
-      }
-    );
-    return logs;
+  static listenToReadWorkLogs(callback: ListenToReadWorkLogsCallback): void {
+    ipcRenderer.once(ipcServiceKeys.readWorkLogs, callback);
   }
 
   static listenToToggleDarkMode(callback: () => void) {
