@@ -21,6 +21,7 @@ import WorkContext from '../context/WorkContext';
 import IpcService from '../services/IpcService';
 import { IWorkLog } from '../models/models';
 import Calculator from '../utils/Calculator';
+import ConfirmDialogButton from '../components/ConfirmDialog/ConfirmDialog';
 
 export default function WorkCheckIn(): ReactElement {
   const {
@@ -43,21 +44,17 @@ export default function WorkCheckIn(): ReactElement {
       throw new Error('stopWork prop method is not defined');
     }
 
-    IpcService.listenToReadWorkLogs(
-      (_event: IpcRendererEvent, logs: Array<IWorkLog>) => {
-        setWorkLogs(logs);
-      }
-    );
+    IpcService.listenToReadWorkLogs((_event: IpcRendererEvent, logs: Array<IWorkLog>) => {
+      setWorkLogs(logs);
+    });
 
     stopWork();
   }
 
   useEffect(() => {
-    IpcService.listenToReadWorkLogs(
-      (_event: IpcRendererEvent, logs: Array<IWorkLog>) => {
-        setWorkLogs(logs);
-      }
-    );
+    IpcService.listenToReadWorkLogs((_event: IpcRendererEvent, logs: Array<IWorkLog>) => {
+      setWorkLogs(logs);
+    });
 
     IpcService.readWorkLogs();
   }, []);
@@ -66,10 +63,12 @@ export default function WorkCheckIn(): ReactElement {
   const formattedCompletedWorkTime = formatTime?.(completedWorkTime);
   const formattedCompletedPauseTime = formatTime?.(completedPauseTime);
   const formattedPausedWorkTime = formatTime?.(pausedWorkTime);
-  const startStopButtonAction = workTime ? onStopWork : startWork;
-  const startStopButtonText = workTime ? 'Stop work' : 'Start work';
+  const startButtonText = 'Start work';
+  const stopButtonText = 'Stop work';
   const pauseResumeButtonAction = isPausing ? resumeWork : pauseWork;
   const pauseResumeButtonText = isPausing ? 'Resume work' : 'Pause work';
+  const stopConfirmHeaderText = 'Stop work';
+  const stopConfirmMessage = 'Are you sure that you want to stop the work session?';
 
   return (
     <>
@@ -97,12 +96,19 @@ export default function WorkCheckIn(): ReactElement {
           </Stat>
         </StatGroup>
         <ButtonGroup marginTop={30} variant="outline" spacing="6">
-          <Button
-            colorScheme={workTime ? 'red' : 'blue'}
-            onClick={startStopButtonAction}
-          >
-            {startStopButtonText}
-          </Button>
+          {workTime ? (
+            <ConfirmDialogButton
+              onConfirm={onStopWork}
+              headerText={stopConfirmHeaderText}
+              confirmMessage={stopConfirmMessage}
+            >
+              {stopButtonText}
+            </ConfirmDialogButton>
+          ) : (
+            <Button colorScheme="blue" onClick={startWork}>
+              {startButtonText}
+            </Button>
+          )}
           <Button disabled={!workTime} onClick={pauseResumeButtonAction}>
             {pauseResumeButtonText}
           </Button>
@@ -120,12 +126,8 @@ export default function WorkCheckIn(): ReactElement {
           {workLogs.map((workLog) => (
             <Tr key={workLog.id}>
               <Td>{moment(workLog.date).format('dddd YYYY-MM-DD')}</Td>
-              <Td isNumeric>
-                {Calculator.getHoursBySeconds(workLog.workTimeInSeconds)}
-              </Td>
-              <Td isNumeric>
-                {Calculator.getHoursBySeconds(workLog.pausedWorkTimeInSeconds)}
-              </Td>
+              <Td isNumeric>{Calculator.getHoursBySeconds(workLog.workTimeInSeconds)}</Td>
+              <Td isNumeric>{Calculator.getHoursBySeconds(workLog.pausedWorkTimeInSeconds)}</Td>
             </Tr>
           ))}
         </Tbody>
