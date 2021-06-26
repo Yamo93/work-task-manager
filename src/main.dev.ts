@@ -130,6 +130,20 @@ export default class Main {
     ipcMain.on('start-work', Main.onStartWork);
     ipcMain.on('stop-work', Main.onStopWork);
     ipcMain.on('read-worklogs', Main.onReadWorkLogs);
+    ipcMain.on('app-quit', Main.onAppQuit);
+  }
+
+  static onAppQuit() {
+    const choice = require('electron').dialog.showMessageBoxSync(Main.mainWindow, {
+      type: 'question',
+      buttons: ['Yes', 'No'],
+      title: 'Confirm quit',
+      message: 'Are you sure you want to quit?',
+    });
+    const isYes = choice === 0;
+    if (isYes) {
+      app.quit();
+    }
   }
 
   static async onReadWorkLogs() {
@@ -184,7 +198,7 @@ export default class Main {
       {
         label: 'Quit',
         click: () => {
-          app.quit();
+          ipcMain.emit('app-quit');
         },
       },
     ]);
