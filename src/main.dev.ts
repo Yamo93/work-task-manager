@@ -11,15 +11,7 @@
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import path from 'path';
-import {
-  app,
-  BrowserWindow,
-  ipcMain,
-  Menu,
-  nativeImage,
-  shell,
-  Tray,
-} from 'electron';
+import { app, BrowserWindow, ipcMain, Menu, nativeImage, shell, Tray } from 'electron';
 import MenuBuilder from './menu';
 import AppUpdater from './auto-updater';
 import FileService from './services/FileService';
@@ -72,10 +64,7 @@ export default class Main {
     Main.startTimeForWork = now;
   }
 
-  private static async onStopWork(
-    _event: Event,
-    workLog: IWorkLog
-  ): Promise<void> {
+  private static async onStopWork(_event: Event, workLog: IWorkLog): Promise<void> {
     Main.stopTimeForWork = new Date(Date.now());
     await FileService.saveWorkLog(workLog);
     await Main.onReadWorkLogs();
@@ -100,10 +89,7 @@ export default class Main {
       : path.join(__dirname, '../assets');
   }
 
-  private static getAssetPath(
-    resourcesPath: string,
-    ...paths: string[]
-  ): string {
+  private static getAssetPath(resourcesPath: string, ...paths: string[]): string {
     return path.join(resourcesPath, ...paths);
   }
 
@@ -162,10 +148,7 @@ export default class Main {
   }
 
   private static async createWindow() {
-    if (
-      process.env.NODE_ENV === 'development' ||
-      process.env.DEBUG_PROD === 'true'
-    ) {
+    if (process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true') {
       await Main.installExtensions();
     }
 
@@ -226,10 +209,7 @@ export default class Main {
       sourceMapSupport.install();
     }
 
-    if (
-      process.env.NODE_ENV === 'development' ||
-      process.env.DEBUG_PROD === 'true'
-    ) {
+    if (process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true') {
       require('electron-debug')();
     }
 

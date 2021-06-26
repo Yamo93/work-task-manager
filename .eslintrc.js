@@ -7,6 +7,7 @@ module.exports = {
       'error',
       {
         endOfLine: 'auto',
+        printWidth: 100,
       },
     ],
     '@typescript-eslint/lines-between-class-members': [
