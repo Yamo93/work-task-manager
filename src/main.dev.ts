@@ -11,17 +11,11 @@
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import path from 'path';
-import {
-  app,
-  BrowserWindow,
-  ipcMain,
-  Menu,
-  nativeImage,
-  shell,
-  Tray,
-} from 'electron';
+import { app, BrowserWindow, ipcMain, Menu, nativeImage, shell, Tray } from 'electron';
 import MenuBuilder from './menu';
 import AppUpdater from './auto-updater';
+import FileService from './services/FileService';
+import { IWorkLog } from './models/models';
 
 export default class Main {
   static mainWindow: Electron.BrowserWindow | null = null;
@@ -70,8 +64,10 @@ export default class Main {
     Main.startTimeForWork = now;
   }
 
-  private static onStopWork(): void {
+  private static async onStopWork(_event: Event, workLog: IWorkLog): Promise<void> {
     Main.stopTimeForWork = new Date(Date.now());
+    await FileService.saveWorkLog(workLog);
+    await Main.onReadWorkLogs();
   }
 
   private static async installExtensions() {
@@ -93,10 +89,7 @@ export default class Main {
       : path.join(__dirname, '../assets');
   }
 
-  private static getAssetPath(
-    resourcesPath: string,
-    ...paths: string[]
-  ): string {
+  private static getAssetPath(resourcesPath: string, ...paths: string[]): string {
     return path.join(resourcesPath, ...paths);
   }
 
@@ -136,6 +129,16 @@ export default class Main {
     ipcMain.on('toggle-dark-mode', Main.onToggleDarkMode);
     ipcMain.on('start-work', Main.onStartWork);
     ipcMain.on('stop-work', Main.onStopWork);
+    ipcMain.on('read-worklogs', Main.onReadWorkLogs);
+  }
+
+  static async onReadWorkLogs() {
+    try {
+      const workLogs = await FileService.readWorkLogs();
+      Main.mainWindow?.webContents.send('read-worklogs', workLogs);
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 
   private static setupApplicationListeners(): void {
@@ -145,10 +148,7 @@ export default class Main {
   }
 
   private static async createWindow() {
-    if (
-      process.env.NODE_ENV === 'development' ||
-      process.env.DEBUG_PROD === 'true'
-    ) {
+    if (process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true') {
       await Main.installExtensions();
     }
 
@@ -209,10 +209,7 @@ export default class Main {
       sourceMapSupport.install();
     }
 
-    if (
-      process.env.NODE_ENV === 'development' ||
-      process.env.DEBUG_PROD === 'true'
-    ) {
+    if (process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true') {
       require('electron-debug')();
     }
 

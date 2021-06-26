@@ -69,9 +69,9 @@ export default function useTimer({
   }
 
   function stopWork(): void {
-    IpcService.emitStopWork();
     setCompletedWorkTime(workTime);
     setCompletedPauseTime(pausedWorkTime);
+    IpcService.emitStopWork(workTime, pausedWorkTime);
     stopWorkTimer();
     clearWorkTime();
     stopPauseTimer();

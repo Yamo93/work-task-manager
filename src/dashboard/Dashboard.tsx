@@ -11,20 +11,21 @@ import {
   TabPanel,
   useColorMode,
 } from '@chakra-ui/react';
-import { ipcRenderer } from 'electron';
 import os from 'os';
 
 import TabView from '../TabView/TabView';
 
-import * as s from './Dashboard.scss';
+import s from './Dashboard.module.scss';
+
 import WorkCheckIn from '../WorkCheckIn/WorkCheckIn';
+import IpcService from '../services/IpcService';
 
 export default function Dashboard(): ReactElement {
   const { username } = os.userInfo();
   const { toggleColorMode } = useColorMode();
 
   useEffect(() => {
-    ipcRenderer.once('toggle-dark-mode', () => {
+    IpcService.listenToToggleDarkMode(() => {
       toggleColorMode();
     });
   }, [toggleColorMode]);
