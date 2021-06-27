@@ -22,6 +22,7 @@ import IpcService from '../services/IpcService';
 import { IWorkLog } from '../models/models';
 import Calculator from '../utils/Calculator';
 import ConfirmDialogButton from '../components/ConfirmDialog/ConfirmDialog';
+import useAlert from '../hooks/useAlert';
 
 export default function WorkCheckIn(): ReactElement {
   const {
@@ -37,6 +38,8 @@ export default function WorkCheckIn(): ReactElement {
     isPausing,
   } = useContext(WorkContext);
 
+  const { showAlert: showSuccessAlert, RenderAlert: SuccessAlert } = useAlert();
+
   const [workLogs, setWorkLogs] = useState<Array<IWorkLog>>([]);
 
   function onStopWork(): void {
@@ -49,6 +52,7 @@ export default function WorkCheckIn(): ReactElement {
     });
 
     stopWork();
+    showSuccessAlert('Congratulations. You have completed the work session.');
   }
 
   useEffect(() => {
@@ -72,6 +76,7 @@ export default function WorkCheckIn(): ReactElement {
 
   return (
     <>
+      <SuccessAlert />
       <Container maxW="container.xl">
         <StatGroup>
           <Stat>
