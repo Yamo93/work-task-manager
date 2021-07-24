@@ -11,4 +11,16 @@ export default class WorkLogFactory {
     };
     return workLog;
   }
+
+  static createAppendedWorkLog(oldWorkLog: IWorkLog, newWorkLog: IWorkLog) {
+    const { workTimeInSeconds: oldWorkTime, pausedWorkTimeInSeconds: oldPausedTime } = oldWorkLog;
+    const { workTimeInSeconds: newWorkTime, pausedWorkTimeInSeconds: newPausedTime } = newWorkLog;
+    const appendedWorkLog: IWorkLog = {
+      ...oldWorkLog,
+      workTimeInSeconds: oldWorkTime + newWorkTime,
+      pausedWorkTimeInSeconds: oldPausedTime + newPausedTime,
+      date: new Date(),
+    };
+    return appendedWorkLog;
+  }
 }

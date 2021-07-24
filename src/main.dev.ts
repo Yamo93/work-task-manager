@@ -43,7 +43,7 @@ export default class Main {
 
   private static onDidFinishLoad(): void {
     if (!Main.mainWindow) {
-      throw new Error('"Main.mainWindow" is not defined');
+      throw new Error('"Main.mainWindow" is not defined.');
     }
     if (process.env.START_MINIMIZED) {
       Main.mainWindow.minimize();
@@ -55,7 +55,7 @@ export default class Main {
 
   private static onToggleDarkMode(): void {
     if (!Main.mainWindow) {
-      throw new Error('"Main.mainWindow" is not defined');
+      throw new Error('"Main.mainWindow" is not defined.');
     }
     Main.mainWindow.webContents.send('toggle-dark-mode');
   }
@@ -113,7 +113,7 @@ export default class Main {
 
   private static setupWindowListeners(): void {
     if (!Main.mainWindow) {
-      throw new Error('"Main.mainWindow" is not defined');
+      throw new Error('"Main.mainWindow" is not defined.');
     }
     // @TODO: Use 'ready-to-show' event
     //        https://github.com/electron/electron/blob/master/docs/api/browser-window.md#using-ready-to-show-event

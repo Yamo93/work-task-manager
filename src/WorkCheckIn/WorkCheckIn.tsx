@@ -44,7 +44,7 @@ export default function WorkCheckIn(): ReactElement {
 
   function onStopWork(): void {
     if (!stopWork) {
-      throw new Error('stopWork prop method is not defined');
+      throw new Error('stopWork prop method is not defined.');
     }
 
     IpcService.listenToReadWorkLogs((_event: IpcRendererEvent, logs: Array<IWorkLog>) => {

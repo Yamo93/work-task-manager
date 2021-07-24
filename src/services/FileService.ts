@@ -1,6 +1,7 @@
-import { promises as fs, mkdirSync } from 'fs';
+import { constants, promises as fs, mkdirSync } from 'fs';
 import moment from 'moment';
 import path from 'path';
+import WorkLogFactory from '../factories/WorkLogFactory';
 import { IWorkLog } from '../models/models';
 
 export default class FileService {
@@ -27,7 +28,7 @@ export default class FileService {
       const directories = await fs.readdir(FileService.newDirectory);
       return directories;
     } catch (error) {
-      throw new Error('Cannot list directories');
+      throw new Error('Cannot list directories.');
     }
   }
 
@@ -39,16 +40,55 @@ export default class FileService {
     }
   }
 
-  static async saveWorkLogFile(workLog: IWorkLog): Promise<void> {
-    const stringifiedWorkLog = FileService.getPrettifiedJson(workLog);
-    await FileService.writeFile(stringifiedWorkLog);
+  static async fileExists(filePath: string): Promise<boolean> {
+    try {
+      await fs.access(filePath, constants.F_OK);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
-  static async writeFile(fileContent: string) {
+  static async saveWorkLogFile(workLog: IWorkLog): Promise<void> {
     try {
-      await fs.writeFile(FileService.newFilePath, fileContent);
+      const fileExists = await FileService.fileExists(FileService.newFilePath);
+      if (fileExists) {
+        await FileService.appendToExistingFile(workLog);
+      } else {
+        await FileService.createNewFile(workLog);
+      }
     } catch (error) {
-      throw new Error('Cannot write file');
+      throw new Error('Cannot save file.');
+    }
+  }
+
+  static async readFile(filePath: string) {
+    try {
+      const file = await fs.readFile(filePath, 'utf8');
+      const parsedFile = JSON.parse(file);
+      return parsedFile;
+    } catch (error) {
+      throw new Error(error);
+    }
+  }
+
+  static async appendToExistingFile(newWorkLog: IWorkLog) {
+    try {
+      const currentFile = await FileService.readFile(FileService.newFilePath);
+      const appendedWorkLog = WorkLogFactory.createAppendedWorkLog(currentFile, newWorkLog);
+      const stringifiedAppendedWorkLog = FileService.getPrettifiedJson(appendedWorkLog);
+      await fs.writeFile(FileService.newFilePath, stringifiedAppendedWorkLog);
+    } catch (error) {
+      throw new Error('Cannot append to existing file.');
+    }
+  }
+
+  static async createNewFile(workLog: IWorkLog) {
+    try {
+      const stringifiedWorkLog = FileService.getPrettifiedJson(workLog);
+      await fs.writeFile(FileService.newFilePath, stringifiedWorkLog);
+    } catch (error) {
+      throw new Error('Cannot create new file.');
     }
   }
 
@@ -56,7 +96,7 @@ export default class FileService {
     try {
       return JSON.stringify(workLog, null, 2);
     } catch (error) {
-      throw new Error('Cannot stringify');
+      throw new Error('Cannot stringify.');
     }
   }
 
@@ -64,9 +104,7 @@ export default class FileService {
     FileService.ensureDirectoryExists();
 
     const fileNames = await fs.readdir(FileService.newDirectory);
-    const filePaths = fileNames.map((fileName) =>
-      path.join(...FileService.pathChunks, fileName)
-    );
+    const filePaths = fileNames.map((fileName) => path.join(...FileService.pathChunks, fileName));
 
     return new Promise((resolve, reject) => {
       const workLogs: Array<IWorkLog> = [];
