@@ -1,12 +1,9 @@
 import { ipcRenderer, IpcRendererEvent } from 'electron';
 import WorkLogFactory from '../factories/WorkLogFactory';
-import { IWorkLog } from '../models/models';
+import { IWorkLog } from '../models/WorkLog';
 import ipcServiceKeys from './const/IpcServiceKeys';
 
-type ListenToReadWorkLogsCallback = (
-  event: IpcRendererEvent,
-  logs: Array<IWorkLog>
-) => void;
+type ListenToReadWorkLogsCallback = (event: IpcRendererEvent, logs: Array<IWorkLog>) => void;
 
 export default class IpcService {
   static listenToReadWorkLogs(callback: ListenToReadWorkLogsCallback): void {
@@ -22,7 +19,11 @@ export default class IpcService {
   }
 
   static emitStopWork(workTime: number, pausedWorkTime: number): void {
-    const workLog = WorkLogFactory.createWorkLog(workTime, pausedWorkTime);
+    const workLogFactory = new WorkLogFactory();
+    const workLog = workLogFactory.create({
+      workTimeInSeconds: workTime,
+      pausedWorkTimeInSeconds: pausedWorkTime,
+    });
     ipcRenderer.send(ipcServiceKeys.stopWork, workLog);
   }
 

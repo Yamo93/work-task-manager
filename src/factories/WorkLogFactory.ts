@@ -1,26 +1,37 @@
 import { v4 as uuidv4 } from 'uuid';
-import { IWorkLog } from '../models/models';
+import { IFactory } from '../interfaces/IFactory';
+import WorkLog, { IWorkLog } from '../models/WorkLog';
 
-export default class WorkLogFactory {
-  static createWorkLog(workTime: number, pausedWorkTime: number) {
-    const workLog: IWorkLog = {
+export default class WorkLogFactory implements IFactory<IWorkLog> {
+  updatedFile: WorkLog | undefined;
+  file!: WorkLog | undefined;
+  folderName: string;
+
+  constructor() {
+    this.folderName = 'worklogs';
+  }
+
+  create({ workTimeInSeconds: workTime, pausedWorkTimeInSeconds: pausedWorkTime }: IWorkLog) {
+    const workLog = new WorkLog({
       id: uuidv4(),
       workTimeInSeconds: workTime,
       pausedWorkTimeInSeconds: pausedWorkTime,
       date: new Date(),
-    };
+    });
+    this.file = workLog;
     return workLog;
   }
 
-  static createAppendedWorkLog(oldWorkLog: IWorkLog, newWorkLog: IWorkLog) {
+  update(oldWorkLog: IWorkLog, newWorkLog: IWorkLog) {
     const { workTimeInSeconds: oldWorkTime, pausedWorkTimeInSeconds: oldPausedTime } = oldWorkLog;
     const { workTimeInSeconds: newWorkTime, pausedWorkTimeInSeconds: newPausedTime } = newWorkLog;
-    const appendedWorkLog: IWorkLog = {
+    const updatedWorkLog = new WorkLog({
       ...oldWorkLog,
       workTimeInSeconds: oldWorkTime + newWorkTime,
       pausedWorkTimeInSeconds: oldPausedTime + newPausedTime,
       date: new Date(),
-    };
-    return appendedWorkLog;
+    });
+    this.updatedFile = updatedWorkLog;
+    return updatedWorkLog;
   }
 }

@@ -1,42 +1,55 @@
 import { constants, promises as fs, mkdirSync } from 'fs';
 import moment from 'moment';
 import path from 'path';
-import WorkLogFactory from '../factories/WorkLogFactory';
-import { IWorkLog } from '../models/models';
+import { IFactory } from '../interfaces/IFactory';
 
-export default class FileService {
+export default class FileService<File> {
   static currentYear: number = moment().year();
   static currentWeek: number = moment().isoWeek();
   static currentDate: string = moment().format('YYMMDD');
-  static pathChunks: Array<string> = [
-    __dirname,
-    '..',
-    'worklogs',
-    FileService.currentYear.toString(),
-    FileService.currentWeek.toString(),
-  ];
+  fileFactory: IFactory<File>;
+  folderName: string;
 
-  static newFilePath: string = path.join(
-    ...FileService.pathChunks,
-    `${FileService.currentDate}.json`
-  );
+  constructor(fileFactory: IFactory<File>) {
+    this.fileFactory = fileFactory;
+    this.folderName = fileFactory.folderName;
+  }
 
-  static newDirectory: string = path.join(...FileService.pathChunks);
+  getPathChunks(): string[] {
+    return [
+      __dirname,
+      '..',
+      'data',
+      this.folderName,
+      FileService.currentYear.toString(),
+      FileService.currentWeek.toString(),
+    ];
+  }
 
-  static async listDirectories(): Promise<string[]> {
+  getNewFilePath(): string {
+    const pathChunks = this.getPathChunks();
+    return path.join(...pathChunks, `${FileService.currentDate}.json`);
+  }
+
+  getNewDirectory(): string {
+    const pathChunks = this.getPathChunks();
+    return path.join(...pathChunks);
+  }
+
+  async listDirectories(): Promise<string[]> {
     try {
-      const directories = await fs.readdir(FileService.newDirectory);
+      const directories = await fs.readdir(this.getNewDirectory());
       return directories;
     } catch (error) {
-      throw new Error('Cannot list directories.');
+      throw new Error(error);
     }
   }
 
-  static ensureDirectoryExists() {
+  ensureDirectoryExists(): string {
     try {
-      return mkdirSync(FileService.newDirectory, { recursive: true });
+      return mkdirSync(this.getNewDirectory(), { recursive: true });
     } catch (error) {
-      throw new Error('Directory cannot be created.');
+      throw new Error(error);
     }
   }
 
@@ -46,19 +59,6 @@ export default class FileService {
       return true;
     } catch (e) {
       return false;
-    }
-  }
-
-  static async saveWorkLogFile(workLog: IWorkLog): Promise<void> {
-    try {
-      const fileExists = await FileService.fileExists(FileService.newFilePath);
-      if (fileExists) {
-        await FileService.appendToExistingFile(workLog);
-      } else {
-        await FileService.createNewFile(workLog);
-      }
-    } catch (error) {
-      throw new Error('Cannot save file.');
     }
   }
 
@@ -72,49 +72,63 @@ export default class FileService {
     }
   }
 
-  static async appendToExistingFile(newWorkLog: IWorkLog) {
+  async updateExistingFile(file: File): Promise<void> {
     try {
-      const currentFile = await FileService.readFile(FileService.newFilePath);
-      const appendedWorkLog = WorkLogFactory.createAppendedWorkLog(currentFile, newWorkLog);
-      const stringifiedAppendedWorkLog = FileService.getPrettifiedJson(appendedWorkLog);
-      await fs.writeFile(FileService.newFilePath, stringifiedAppendedWorkLog);
+      const currentFile = await FileService.readFile(this.getNewFilePath());
+      const updatedFile = this.fileFactory.update(currentFile, file);
+      const stringifiedUpdatedFile = FileService.getPrettifiedJson(updatedFile);
+      await fs.writeFile(this.getNewFilePath(), stringifiedUpdatedFile);
     } catch (error) {
-      throw new Error('Cannot append to existing file.');
+      throw new Error(error);
     }
   }
 
-  static async createNewFile(workLog: IWorkLog) {
+  async createNewFile(file: File): Promise<void> {
     try {
-      const stringifiedWorkLog = FileService.getPrettifiedJson(workLog);
-      await fs.writeFile(FileService.newFilePath, stringifiedWorkLog);
+      const stringifiedFile = FileService.getPrettifiedJson(file);
+      await fs.writeFile(this.getNewFilePath(), stringifiedFile);
     } catch (error) {
-      throw new Error('Cannot create new file.');
+      throw new Error(error);
     }
   }
 
-  static getPrettifiedJson(workLog: IWorkLog): string {
+  async saveFile(file: File): Promise<void> {
+    this.ensureDirectoryExists();
     try {
-      return JSON.stringify(workLog, null, 2);
+      const fileExists = await FileService.fileExists(this.getNewFilePath());
+      if (fileExists) {
+        await this.updateExistingFile(file);
+      } else {
+        await this.createNewFile(file);
+      }
     } catch (error) {
-      throw new Error('Cannot stringify.');
+      throw new Error(error);
     }
   }
 
-  static async readWorkLogs(): Promise<IWorkLog[]> {
-    FileService.ensureDirectoryExists();
+  static getPrettifiedJson<F>(file: F): string {
+    try {
+      return JSON.stringify(file, null, 2);
+    } catch (error) {
+      throw new Error(error);
+    }
+  }
 
-    const fileNames = await fs.readdir(FileService.newDirectory);
-    const filePaths = fileNames.map((fileName) => path.join(...FileService.pathChunks, fileName));
+  async readFiles(): Promise<File[]> {
+    this.ensureDirectoryExists();
+
+    const fileNames = await fs.readdir(this.getNewDirectory());
+    const filePaths = fileNames.map((fileName) => path.join(...this.getPathChunks(), fileName));
 
     return new Promise((resolve, reject) => {
-      const workLogs: Array<IWorkLog> = [];
+      const files: Array<File> = [];
       const promises = filePaths.map((filePath: string) => {
         return fs
           .readFile(filePath, 'utf8')
-          .then((workLog) => {
-            const parsedWorkLog: IWorkLog = JSON.parse(workLog);
-            workLogs.push(parsedWorkLog);
-            return workLogs;
+          .then((file) => {
+            const parsedFile: File = JSON.parse(file);
+            files.push(parsedFile);
+            return files;
           })
           .catch((error) => {
             throw new Error(error);
@@ -122,17 +136,12 @@ export default class FileService {
       });
       Promise.all(promises)
         .then(() => {
-          resolve(workLogs);
-          return workLogs;
+          resolve(files);
+          return files;
         })
         .catch((error) => {
           reject(error);
         });
     });
-  }
-
-  static async saveWorkLog(workLog: IWorkLog): Promise<void> {
-    FileService.ensureDirectoryExists();
-    FileService.saveWorkLogFile(workLog);
   }
 }

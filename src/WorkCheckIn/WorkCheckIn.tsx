@@ -19,7 +19,7 @@ import moment from 'moment';
 
 import WorkContext from '../context/WorkContext';
 import IpcService from '../services/IpcService';
-import { IWorkLog } from '../models/models';
+import { IWorkLog } from '../models/WorkLog';
 import Calculator from '../utils/Calculator';
 import ConfirmDialogButton from '../components/ConfirmDialog/ConfirmDialog';
 import useAlert from '../hooks/useAlert';
