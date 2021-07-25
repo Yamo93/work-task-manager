@@ -15,7 +15,9 @@ import { app, BrowserWindow, ipcMain, Menu, nativeImage, shell, Tray } from 'ele
 import MenuBuilder from './menu';
 import AppUpdater from './auto-updater';
 import FileService from './services/FileService';
-import { IWorkLog } from './models/models';
+import { IWorkLog } from './models/WorkLog';
+import WorkLogFactory from './factories/WorkLogFactory';
+import { IFactory } from './interfaces/IFactory';
 
 export default class Main {
   static mainWindow: Electron.BrowserWindow | null = null;
@@ -43,7 +45,7 @@ export default class Main {
 
   private static onDidFinishLoad(): void {
     if (!Main.mainWindow) {
-      throw new Error('"Main.mainWindow" is not defined');
+      throw new Error('"Main.mainWindow" is not defined.');
     }
     if (process.env.START_MINIMIZED) {
       Main.mainWindow.minimize();
@@ -55,7 +57,7 @@ export default class Main {
 
   private static onToggleDarkMode(): void {
     if (!Main.mainWindow) {
-      throw new Error('"Main.mainWindow" is not defined');
+      throw new Error('"Main.mainWindow" is not defined.');
     }
     Main.mainWindow.webContents.send('toggle-dark-mode');
   }
@@ -64,9 +66,16 @@ export default class Main {
     Main.startTimeForWork = now;
   }
 
+  private static getWorkLogFileService(): FileService<IWorkLog> {
+    const workLogFactory: IFactory<IWorkLog> = new WorkLogFactory();
+    const fileService = new FileService(workLogFactory);
+    return fileService;
+  }
+
   private static async onStopWork(_event: Event, workLog: IWorkLog): Promise<void> {
     Main.stopTimeForWork = new Date(Date.now());
-    await FileService.saveWorkLog(workLog);
+    const workLogFileService = Main.getWorkLogFileService();
+    await workLogFileService.saveFile(workLog);
     await Main.onReadWorkLogs();
   }
 
@@ -113,7 +122,7 @@ export default class Main {
 
   private static setupWindowListeners(): void {
     if (!Main.mainWindow) {
-      throw new Error('"Main.mainWindow" is not defined');
+      throw new Error('"Main.mainWindow" is not defined.');
     }
     // @TODO: Use 'ready-to-show' event
     //        https://github.com/electron/electron/blob/master/docs/api/browser-window.md#using-ready-to-show-event
@@ -148,7 +157,8 @@ export default class Main {
 
   static async onReadWorkLogs() {
     try {
-      const workLogs = await FileService.readWorkLogs();
+      const workLogFileService = Main.getWorkLogFileService();
+      const workLogs = await workLogFileService.readFiles();
       Main.mainWindow?.webContents.send('read-worklogs', workLogs);
     } catch (error) {
       throw new Error(error);

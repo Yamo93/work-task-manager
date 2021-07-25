@@ -1,5 +1,5 @@
 import { createContext, SetStateAction } from 'react';
-import { IWorkLog } from '../models/models';
+import { IWorkLog } from '../models/WorkLog';
 
 export interface IWorkContext {
   workTime: number;
