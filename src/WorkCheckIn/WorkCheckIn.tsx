@@ -45,13 +45,29 @@ export default function WorkCheckIn(): ReactElement {
 
   const [workLogs, setWorkLogs] = useState<Array<IWorkLog>>([]);
 
+  function workLogSorter(a: IWorkLog, b: IWorkLog) {
+    if (!a.date || !b.date) {
+      return 0;
+    }
+    if (new Date(a.date) > new Date(b.date)) {
+      return -1;
+    }
+    return 1;
+  }
+
+  function setLogs(logs: Array<IWorkLog>): void {
+    const clonedLogs = [...logs];
+    clonedLogs.sort(workLogSorter);
+    setWorkLogs(clonedLogs);
+  }
+
   function onStopWork(): void {
     if (!stopWork) {
       throw new Error('stopWork prop method is not defined.');
     }
 
     IpcService.listenToReadWorkLogs((_event: IpcRendererEvent, logs: Array<IWorkLog>) => {
-      setWorkLogs(logs);
+      setLogs(logs);
     });
 
     stopWork();
@@ -65,10 +81,11 @@ export default function WorkCheckIn(): ReactElement {
 
   useEffect(() => {
     IpcService.listenToReadWorkLogs((_event: IpcRendererEvent, logs: Array<IWorkLog>) => {
-      setWorkLogs(logs);
+      setLogs(logs);
     });
 
     IpcService.readWorkLogs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const formattedWorkTime = formatTime?.(workTime);
