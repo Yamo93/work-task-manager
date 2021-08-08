@@ -180,6 +180,8 @@ export default class Main {
 
     Main.mainWindow = Main.buildBrowserWindow(RESOURCES_PATH);
 
+    Main.maximizeMainWindow();
+
     Main.mainWindow.loadURL(`file://${__dirname}/index.html`);
 
     Main.setupWindowListeners();
@@ -191,6 +193,10 @@ export default class Main {
     // Remove this if your app does not use auto updates
     // eslint-disable-next-line
     new AppUpdater();
+  }
+
+  private static maximizeMainWindow() {
+    Main.mainWindow?.maximize();
   }
 
   private static createTray() {
