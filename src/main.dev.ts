@@ -18,6 +18,7 @@ import FileService from './services/FileService';
 import { IWorkLog } from './models/WorkLog';
 import WorkLogFactory from './factories/WorkLogFactory';
 import { IFactory } from './interfaces/IFactory';
+import ipcServiceKeys from './services/const/IpcServiceKeys';
 
 export default class Main {
   static mainWindow: Electron.BrowserWindow | null = null;
@@ -135,11 +136,11 @@ export default class Main {
   }
 
   private static setupIpcListeners(): void {
-    ipcMain.on('toggle-dark-mode', Main.onToggleDarkMode);
-    ipcMain.on('start-work', Main.onStartWork);
-    ipcMain.on('stop-work', Main.onStopWork);
-    ipcMain.on('read-worklogs', Main.onReadWorkLogs);
-    ipcMain.on('app-quit', Main.onAppQuit);
+    ipcMain.on(ipcServiceKeys.toggleDarkMode, Main.onToggleDarkMode);
+    ipcMain.on(ipcServiceKeys.startWork, Main.onStartWork);
+    ipcMain.on(ipcServiceKeys.stopWork, Main.onStopWork);
+    ipcMain.on(ipcServiceKeys.readWorkLogs, Main.onReadWorkLogs);
+    ipcMain.on(ipcServiceKeys.appQuit, Main.onAppQuit);
   }
 
   static onAppQuit() {
