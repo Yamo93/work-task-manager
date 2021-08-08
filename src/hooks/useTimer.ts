@@ -4,6 +4,7 @@ import IpcService from '../services/IpcService';
 import LocalStorageService from '../services/LocalStorageService';
 
 type HookResult = IWorkContext;
+type SetTime = (value: React.SetStateAction<number>) => void;
 
 interface HookConfig {
   storedWorkTime: number;
@@ -98,6 +99,31 @@ export default function useTimer({
     return `${hours}:${minutes}:${seconds}`;
   }
 
+  function appendTime(appendedTimeInMinutes: number, withdraw: boolean) {
+    return (setTime: SetTime, withdrawFromTime: SetTime): void => {
+      const appendedWorkTimeInSeconds = appendedTimeInMinutes * 60;
+      setTime((previousWorkTimeInSeconds: number) => {
+        return previousWorkTimeInSeconds + appendedWorkTimeInSeconds;
+      });
+
+      if (withdraw) {
+        withdrawFromTime((previousPausedWorkTimeInSeconds: number) => {
+          return previousPausedWorkTimeInSeconds - appendedWorkTimeInSeconds;
+        });
+      }
+    };
+  }
+
+  function appendWorkTime(appendedWorkTimeInMinutes: number, withdrawFromPauseTime: boolean) {
+    const append = appendTime(appendedWorkTimeInMinutes, withdrawFromPauseTime);
+    append(setWorkTime, setPausedWorkTime);
+  }
+
+  function appendPauseTime(appendedPauseTimeInMinutes: number, withdrawFromWorkTime: boolean) {
+    const append = appendTime(appendedPauseTimeInMinutes, withdrawFromWorkTime);
+    append(setPausedWorkTime, setWorkTime);
+  }
+
   useEffect(() => {
     if (!isPausing && !storedIsPausing && storedWorkTime) {
       startWorkTimer();
@@ -133,5 +159,7 @@ export default function useTimer({
     pausedWorkTime,
     isPausing,
     completedPauseTime,
+    appendWorkTime,
+    appendPauseTime,
   };
 }

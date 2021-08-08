@@ -23,6 +23,7 @@ import { IWorkLog } from '../models/WorkLog';
 import Calculator from '../utils/Calculator';
 import ConfirmDialogButton from '../components/ConfirmDialog/ConfirmDialog';
 import useAlert from '../hooks/useAlert';
+import AppendTimeModal, { ActionPayload } from '../modals/AppendTimeModal/AppendTimeModal';
 
 export default function WorkCheckIn(): ReactElement {
   const {
@@ -36,6 +37,8 @@ export default function WorkCheckIn(): ReactElement {
     completedPauseTime,
     pausedWorkTime,
     isPausing,
+    appendWorkTime,
+    appendPauseTime,
   } = useContext(WorkContext);
 
   const { showAlert: showSuccessAlert, RenderAlert: SuccessAlert } = useAlert();
@@ -55,6 +58,11 @@ export default function WorkCheckIn(): ReactElement {
     showSuccessAlert('Congratulations. You have completed the work session.');
   }
 
+  function appendTime(payload: ActionPayload) {
+    appendWorkTime?.(payload.appendedWorkTime, payload.withdrawFromPauseTime);
+    appendPauseTime?.(payload.appendedPauseTime, payload.withdrawFromWorkTime);
+  }
+
   useEffect(() => {
     IpcService.listenToReadWorkLogs((_event: IpcRendererEvent, logs: Array<IWorkLog>) => {
       setWorkLogs(logs);
@@ -71,7 +79,10 @@ export default function WorkCheckIn(): ReactElement {
   const stopButtonText = 'Stop work';
   const pauseResumeButtonAction = isPausing ? resumeWork : pauseWork;
   const pauseResumeButtonText = isPausing ? 'Resume work' : 'Pause work';
+  const appendTimeButtonText = 'Append time';
+  const appendTimeModalTitleText = 'Append time';
   const stopConfirmHeaderText = 'Stop work';
+  const saveText = 'Save';
   const stopConfirmMessage = 'Are you sure that you want to stop the work session?';
 
   return (
@@ -117,6 +128,13 @@ export default function WorkCheckIn(): ReactElement {
           <Button disabled={!workTime} onClick={pauseResumeButtonAction}>
             {pauseResumeButtonText}
           </Button>
+          <AppendTimeModal
+            disabled={!workTime}
+            modalTitle={appendTimeModalTitleText}
+            openButtonText={appendTimeButtonText}
+            actionButtonText={saveText}
+            action={appendTime}
+          />
         </ButtonGroup>
       </Container>
       <Table variant="simple" marginTop={15} colorScheme="teal" size="lg">
