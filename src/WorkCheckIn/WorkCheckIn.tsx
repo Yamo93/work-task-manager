@@ -166,8 +166,8 @@ export default function WorkCheckIn(): ReactElement {
           {workLogs.map((workLog) => (
             <Tr key={workLog.id}>
               <Td>{moment(workLog.date).format('dddd YYYY-MM-DD')}</Td>
-              <Td isNumeric>{Calculator.getHoursBySeconds(workLog.workTimeInSeconds)}</Td>
-              <Td isNumeric>{Calculator.getHoursBySeconds(workLog.pausedWorkTimeInSeconds)}</Td>
+              <Td isNumeric>{formatTime?.(workLog.workTimeInSeconds)}</Td>
+              <Td isNumeric>{formatTime?.(workLog.pausedWorkTimeInSeconds)}</Td>
             </Tr>
           ))}
         </Tbody>
