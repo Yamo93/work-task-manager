@@ -13,6 +13,8 @@ import {
   Th,
   Tbody,
   Td,
+  Progress,
+  Box,
 } from '@chakra-ui/react';
 import { IpcRendererEvent } from 'electron';
 import moment from 'moment';
@@ -23,6 +25,8 @@ import { IWorkLog } from '../models/WorkLog';
 import ConfirmDialogButton from '../components/ConfirmDialog/ConfirmDialog';
 import useAlert, { alertTypes } from '../hooks/useAlert';
 import AppendTimeModal, { ActionPayload } from '../modals/AppendTimeModal/AppendTimeModal';
+
+const MAX_WORK_TIME_IN_SECONDS = 8 * 60 * 60;
 
 export default function WorkCheckIn(): ReactElement {
   const {
@@ -114,6 +118,9 @@ export default function WorkCheckIn(): ReactElement {
   const stopConfirmMessage = 'Are you sure that you want to stop the work session?';
   const abortConfirmMessage = 'Are you sure that you want to abort the work session?';
 
+  const currentProgress = (workTime / MAX_WORK_TIME_IN_SECONDS) * 100;
+  const progressColorScheme = workTime < MAX_WORK_TIME_IN_SECONDS ? 'green' : 'red';
+
   return (
     <>
       <SuccessAlert />
@@ -141,6 +148,15 @@ export default function WorkCheckIn(): ReactElement {
             <StatNumber>{formattedCompletedPauseTime}</StatNumber>
           </Stat>
         </StatGroup>
+        <Box marginTop={5}>
+          <Progress
+            colorScheme={progressColorScheme}
+            textAlign="left"
+            hasStripe
+            isAnimated
+            value={currentProgress}
+          />
+        </Box>
         <ButtonGroup marginTop={30} variant="outline" spacing="6">
           {workTime ? (
             <ConfirmDialogButton
