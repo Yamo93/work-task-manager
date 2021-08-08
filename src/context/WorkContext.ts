@@ -1,5 +1,4 @@
-import { createContext, SetStateAction } from 'react';
-import { IWorkLog } from '../models/WorkLog';
+import { createContext } from 'react';
 
 export interface IWorkContext {
   workTime: number;
@@ -12,6 +11,8 @@ export interface IWorkContext {
   resumeWork?: () => void;
   formatTime?: (time?: number) => string;
   isPausing: boolean;
+  appendWorkTime?: (appendedWorkTimeInMinutes: number, withdrawFromPauseTime: boolean) => void;
+  appendPauseTime?: (appendedPauseTimeInMinutes: number, withdrawFromWorkTime: boolean) => void;
 }
 
 const workContext = createContext<IWorkContext>({
