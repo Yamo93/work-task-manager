@@ -17,6 +17,7 @@ interface Props {
   confirmMessage: string;
   buttonColorScheme?: string;
   children: ReactNode;
+  disabled?: boolean;
 }
 
 export default function ConfirmDialogButton({
@@ -25,13 +26,19 @@ export default function ConfirmDialogButton({
   confirmMessage,
   children,
   buttonColorScheme,
+  disabled,
 }: Props): ReactElement {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const cancelRef = useRef<HTMLButtonElement>(null);
 
+  function confirm() {
+    onClose();
+    onConfirm();
+  }
+
   return (
     <>
-      <Button colorScheme={buttonColorScheme} onClick={onOpen}>
+      <Button disabled={disabled} colorScheme={buttonColorScheme} onClick={onOpen}>
         {children}
       </Button>
       <AlertDialog
@@ -51,7 +58,7 @@ export default function ConfirmDialogButton({
             <Button ref={cancelRef} onClick={onClose}>
               No
             </Button>
-            <Button colorScheme="red" ml={3} onClick={onConfirm}>
+            <Button colorScheme="red" ml={3} onClick={confirm}>
               Yes
             </Button>
           </AlertDialogFooter>
@@ -63,4 +70,5 @@ export default function ConfirmDialogButton({
 
 ConfirmDialogButton.defaultProps = {
   buttonColorScheme: 'red',
+  disabled: false,
 };

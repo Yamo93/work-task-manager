@@ -6,6 +6,17 @@ interface HookResult {
   RenderAlert: () => ReactElement;
 }
 
+interface AlertType {
+  [key: string]: StatusType;
+}
+
+export const alertTypes: AlertType = {
+  success: 'success',
+  info: 'info',
+  warning: 'warning',
+  error: 'error',
+};
+
 export default function useAlert(status: StatusType = 'success'): HookResult {
   const [isVisible, setIsVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
