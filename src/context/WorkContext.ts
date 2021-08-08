@@ -7,6 +7,7 @@ export interface IWorkContext {
   pausedWorkTime: number;
   startWork?: () => void;
   stopWork?: () => void;
+  abortWork?: () => void;
   pauseWork?: () => void;
   resumeWork?: () => void;
   formatTime?: (time?: number) => string;

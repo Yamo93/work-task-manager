@@ -20,15 +20,15 @@ import moment from 'moment';
 import WorkContext from '../context/WorkContext';
 import IpcService from '../services/IpcService';
 import { IWorkLog } from '../models/WorkLog';
-import Calculator from '../utils/Calculator';
 import ConfirmDialogButton from '../components/ConfirmDialog/ConfirmDialog';
-import useAlert from '../hooks/useAlert';
+import useAlert, { alertTypes } from '../hooks/useAlert';
 import AppendTimeModal, { ActionPayload } from '../modals/AppendTimeModal/AppendTimeModal';
 
 export default function WorkCheckIn(): ReactElement {
   const {
     startWork,
     stopWork,
+    abortWork,
     pauseWork,
     resumeWork,
     formatTime,
@@ -42,6 +42,7 @@ export default function WorkCheckIn(): ReactElement {
   } = useContext(WorkContext);
 
   const { showAlert: showSuccessAlert, RenderAlert: SuccessAlert } = useAlert();
+  const { showAlert: showInfoAlert, RenderAlert: InfoAlert } = useAlert(alertTypes.info);
 
   const [workLogs, setWorkLogs] = useState<Array<IWorkLog>>([]);
 
@@ -74,6 +75,14 @@ export default function WorkCheckIn(): ReactElement {
     showSuccessAlert('Congratulations. You have completed the work session.');
   }
 
+  function onAbortWork(): void {
+    if (!abortWork) {
+      throw new Error('abortWork prop method is not defined.');
+    }
+    abortWork();
+    showInfoAlert('The work session was aborted.');
+  }
+
   function appendTime(payload: ActionPayload) {
     appendWorkTime?.(payload.appendedWorkTime, payload.withdrawFromPauseTime);
     appendPauseTime?.(payload.appendedPauseTime, payload.withdrawFromWorkTime);
@@ -94,17 +103,21 @@ export default function WorkCheckIn(): ReactElement {
   const formattedPausedWorkTime = formatTime?.(pausedWorkTime);
   const startButtonText = 'Start work';
   const stopButtonText = 'Stop work';
+  const abortButtonText = 'Abort work';
   const pauseResumeButtonAction = isPausing ? resumeWork : pauseWork;
   const pauseResumeButtonText = isPausing ? 'Resume work' : 'Pause work';
   const appendTimeButtonText = 'Append time';
   const appendTimeModalTitleText = 'Append time';
   const stopConfirmHeaderText = 'Stop work';
+  const abortConfirmHeaderText = 'Abort time';
   const saveText = 'Save';
   const stopConfirmMessage = 'Are you sure that you want to stop the work session?';
+  const abortConfirmMessage = 'Are you sure that you want to abort the work session?';
 
   return (
     <>
       <SuccessAlert />
+      <InfoAlert />
       <Container maxW="container.xl">
         <StatGroup>
           <Stat>
@@ -145,6 +158,14 @@ export default function WorkCheckIn(): ReactElement {
           <Button disabled={!workTime} onClick={pauseResumeButtonAction}>
             {pauseResumeButtonText}
           </Button>
+          <ConfirmDialogButton
+            disabled={!workTime}
+            onConfirm={onAbortWork}
+            headerText={abortConfirmHeaderText}
+            confirmMessage={abortConfirmMessage}
+          >
+            {abortButtonText}
+          </ConfirmDialogButton>
           <AppendTimeModal
             disabled={!workTime}
             modalTitle={appendTimeModalTitleText}

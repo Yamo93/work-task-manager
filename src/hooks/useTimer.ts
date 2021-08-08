@@ -79,6 +79,15 @@ export default function useTimer({
     clearPauseTime();
   }
 
+  function abortWork(): void {
+    setCompletedWorkTime(0);
+    setCompletedPauseTime(0);
+    stopWorkTimer();
+    clearWorkTime();
+    stopPauseTimer();
+    clearPauseTime();
+  }
+
   function pauseWork(): void {
     stopWorkTimer();
     startPauseTimer();
@@ -151,6 +160,7 @@ export default function useTimer({
   return {
     startWork,
     stopWork,
+    abortWork,
     pauseWork,
     resumeWork,
     workTime,
