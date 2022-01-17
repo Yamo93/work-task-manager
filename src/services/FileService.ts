@@ -1,3 +1,4 @@
+import { app } from 'electron';
 import { constants, promises as fs, mkdirSync } from 'fs';
 import moment from 'moment';
 import path from 'path';
@@ -16,9 +17,9 @@ export default class FileService<File> {
   }
 
   getPathChunks(): string[] {
+    const userDataPathChunks = app.getPath('userData').split(path.sep);
     return [
-      __dirname,
-      '..',
+      ...userDataPathChunks,
       'data',
       this.folderName,
       FileService.currentYear.toString(),
